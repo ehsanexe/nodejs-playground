@@ -41,7 +41,9 @@ exports.getCart = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
   const productId = req.body.productId;
-  Cart.addToCart(productId, 12)
+  Product.findById(productId, (product) => {
+    Cart.addToCart(productId, product.price);
+  });
   res.redirect("/");
 };
 
