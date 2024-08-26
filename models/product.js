@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Cart = require("./cart");
+// const db = require("../util/database");
 
 const p = path.join(
   path.dirname(process.mainModule.filename),
@@ -28,6 +29,10 @@ module.exports = class Product {
   }
 
   save() {
+    // return db.execute(
+    //   "INSERT INTO products (id, title, imageUrl, description, price) VALUES (?,?,?,?,?)",
+    //   [this.id, this.title, this.imageUrl, this.description, this.price]
+    // );
     getProductsFromFile((products) => {
       if (this.id) {
         const index = products.findIndex((p) => p.id === this.id);
@@ -46,10 +51,12 @@ module.exports = class Product {
   }
 
   static fetchAll(cb) {
+    // return db.execute("SELECT * FROM products");
     getProductsFromFile(cb);
   }
 
-  static findById(id, cb) {
+  static findById(id) {
+    // return db.execute("SELECT * FROM products where id=?", [id]);
     getProductsFromFile((products) => {
       cb(products.find((p) => p.id === id));
     });
