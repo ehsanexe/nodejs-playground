@@ -18,29 +18,15 @@ exports.postAddProduct = (req, res, next) => {
   product.save();
 };
 
-// exports.postEditProduct = (req, res, next) => {
-//   const id = req.body.productId;
-//   const title = req.body.title;
-//   const imageUrl = req.body.imageUrl;
-//   const price = req.body.price;
-//   const description = req.body.description;
+exports.postEditProduct = (req, res, next) => {
+  const id = req.body.productId;
+  const title = req.body.title;
+  const imageUrl = req.body.imageUrl;
+  const price = req.body.price;
+  const description = req.body.description;
 
-//   Product.findByPk(id)
-//     .then((product) => {
-//       product.title = title;
-//       product.imageUrl = imageUrl;
-//       product.price = price;
-//       product.description = description;
-//       return product.save();
-//     })
-//     .then((result) => {
-//       console.log("PRODUCT UPDATED");
-//       res.redirect("/admin/products");
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     });
-// };
+  
+};
 
 // exports.getEditProduct = (req, res, next) => {
 //   const editMode = req.query.edit;
