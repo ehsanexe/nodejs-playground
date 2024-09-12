@@ -75,7 +75,15 @@ class User {
   async addOrder() {
     const db = getDb();
     try {
-      await db.collection("orders").insertOne(this.cart);
+      const products = await this.getCart();
+      const order = {
+        items: products,
+        user: {
+          _id: new mongodb.ObjectId(this.id),
+          email: this.email,
+        },
+      };
+      await db.collection("orders").insertOne(order);
       await db
         .collection("users")
         .updateOne(
@@ -85,6 +93,14 @@ class User {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new mongodb.ObjectId(this.id) })
+      .toArray();
   }
 
   static findById(_id) {
