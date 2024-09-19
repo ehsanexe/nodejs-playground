@@ -8,6 +8,11 @@ const userSchema = new Schema({
     required: true,
   },
 
+  name: {
+    type: String,
+    required: true,
+  },
+
   cart: {
     items: [
       {
@@ -42,6 +47,19 @@ userSchema.methods.addToCart = function (product) {
   };
 
   this.cart = updatedCart;
+  return this.save();
+};
+
+userSchema.methods.deleteItemFromCart = function (productId) {
+  const updatedItems = this.cart.items.filter(
+    (item) => item.productId.toString() !== productId.toString()
+  );
+  this.cart.items = updatedItems;
+  return this.save();
+};
+
+userSchema.methods.clearCart = function () {
+  this.cart.items = [];
   return this.save();
 };
 

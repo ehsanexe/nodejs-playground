@@ -1,3 +1,4 @@
+const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
 
@@ -85,8 +86,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  Order.find({"user.userId": req.user._id})
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
@@ -101,7 +101,22 @@ exports.getOrders = (req, res, next) => {
 
 exports.postOrder = async (req, res, next) => {
   try {
-    await req.user.addOrder();
+    const user = await req.user.populate("cart.items.productId");
+    const products = user.cart.items.map((i) => ({
+      product: i.productId.toJSON(),
+      qty: i.qty,
+    }));
+
+    const order = new Order({
+      user: {
+        name: req.user.id,
+        userId: req.user, //mongoos auto extracts id
+      },
+      products: products,
+    });
+
+    await order.save();
+    await req.user.clearCart();
     res.redirect("/orders");
   } catch (error) {
     console.log(error);
