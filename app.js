@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-const loginRoutes = require("./routes/login");
+const loginRoutes = require("./routes/auth");
 const User = require("./models/user");
 const { default: mongoose } = require("mongoose");
 
