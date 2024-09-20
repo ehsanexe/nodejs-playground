@@ -6,36 +6,58 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const loginRoutes = require("./routes/auth");
 const User = require("./models/user");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
+const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
 
+const uri =
+  "mongodb+srv://Ehsan:HqdAjLDeFYCDNLLO@cluster0.amb7h.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0";
 const app = express();
+const store = new MongoDBStore({
+  uri,
+  collection: "mySessions",
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+    store,
+  })
+);
+
 app.use((req, res, next) => {
-  User.findById("66ea78393ad7221c3ead5ac8")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  next();
+});
+
+app.use(async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      return next();
+    }
+    const user = await User.findById(req.session.user);
+    req.user = user;
+    next();
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
-app.use(loginRoutes)
+app.use(loginRoutes);
 
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    "mongodb+srv://Ehsan:HqdAjLDeFYCDNLLO@cluster0.amb7h.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(uri)
   .then(() => {
     console.log("connected");
     app.listen(3010);

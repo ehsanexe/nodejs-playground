@@ -66,6 +66,13 @@ form {
   color: white;
 }
 
+.main-header__item button {
+  all: unset;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
 .main-header__item a:hover,
 .main-header__item a:active,
 .main-header__item a.active {
