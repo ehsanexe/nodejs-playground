@@ -3,8 +3,11 @@ const path = require("path");
 const express = require("express");
 
 const adminController = require("../controllers/admin");
+const { isAuth } = require("../middlewares/auth");
 
 const router = express.Router();
+
+router.use(isAuth);
 
 router.get("/add-product", adminController.getAddProduct);
 
