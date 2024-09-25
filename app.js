@@ -11,6 +11,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const { doubleCsrf } = require("csrf-csrf");
 const cookieParser = require("cookie-parser");
+const flash = require('connect-flash');
 
 const uri =
   "mongodb+srv://Ehsan:HqdAjLDeFYCDNLLO@cluster0.amb7h.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0";
@@ -45,6 +46,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(doubleCsrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
