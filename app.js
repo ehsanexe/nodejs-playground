@@ -12,9 +12,9 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const { doubleCsrf } = require("csrf-csrf");
 const cookieParser = require("cookie-parser");
 const flash = require('connect-flash');
+require('dotenv').config(); // Load environment variables
 
-const uri =
-  "mongodb+srv://Ehsan:HqdAjLDeFYCDNLLO@cluster0.amb7h.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_DB;
 const app = express();
 const store = new MongoDBStore({
   uri,
@@ -77,6 +77,6 @@ mongoose
   .connect(uri)
   .then(() => {
     console.log("connected");
-    app.listen(3010);
+    app.listen(process.env.DEV_PORT);
   })
   .catch((err) => console.log(err));
