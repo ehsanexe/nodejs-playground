@@ -1,5 +1,15 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+
+const transport = nodemailer.createTransport({
+  host:  process.env.NODEMAILER_HOST,
+  port: process.env.NODEMAILER_PORT,
+  auth: {
+    user: process.env.NODEMAILER_USER,
+    pass: process.env.NODEMAILER_PASSWORD,
+  },
+});
 
 exports.getLogin = (req, res, next) => {
   const msg = req.flash("error");
@@ -37,6 +47,12 @@ exports.postSignup = async (req, res, next) => {
     });
     await user.save();
     res.redirect("/login");
+    transport.sendMail({
+      from: '"Shop" <shop@mart.com>', // sender address
+      to: email, // list of receivers
+      subject: "Welcome to Our Shop", // Subject line
+      html: "<p>We’re excited to have you on board. Your account has been successfully created.</p>", // plain text body
+    });
   } catch (error) {
     console.log(error);
   }

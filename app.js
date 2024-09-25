@@ -1,3 +1,4 @@
+require('dotenv').config(); // Load environment variables
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -12,7 +13,6 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const { doubleCsrf } = require("csrf-csrf");
 const cookieParser = require("cookie-parser");
 const flash = require('connect-flash');
-require('dotenv').config(); // Load environment variables
 
 const uri = process.env.MONGO_DB;
 const app = express();
