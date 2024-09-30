@@ -32,6 +32,10 @@ exports.postEditProduct = async (req, res, next) => {
 
   const product = await Product.findById(id);
 
+  if (product.userId.toString() !== req.user._id.toString()) {
+    return res.redirect('/');
+  }
+
   product.title = req.body.title;
   product.imageUrl = req.body.imageUrl;
   product.price = req.body.price;
@@ -69,7 +73,7 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({userId: req.user._id})
     .then((products) => {
       res.render("admin/products", {
         prods: products,
@@ -83,7 +87,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.postDeleteProduct = (req, res) => {
-  Product.findByIdAndRemove(req.body.productId)
+  Product.deleteOne({ _id: req.body.productId, userId: req.user._id })
     .then(() => {
       res.redirect("/admin/products");
     })
