@@ -26,9 +26,7 @@ exports.loginValidator = [
   body("email").isEmail().withMessage("Invalid email"),
   body("email")
     .custom(async (value, { req }) => {
-      console.log({value})
       const user = await User.findOne({ email: value });
-      console.log({user})
 
       if (!user) {
         throw new Error("error", "invalid email!");
