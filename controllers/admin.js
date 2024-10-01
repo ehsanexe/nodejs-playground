@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
@@ -5,6 +6,7 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
+    errorMessage: "",
   });
 };
 
@@ -13,6 +15,22 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      errorMessage: result.array()[0].msg,
+      product: {
+        title,
+        imageUrl,
+        price,
+        description,
+      },
+    });
+  }
 
   const product = new Product({
     title,
@@ -30,10 +48,27 @@ exports.postAddProduct = (req, res, next) => {
 exports.postEditProduct = async (req, res, next) => {
   const id = req.body.productId;
 
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: true,
+      errorMessage: result.array()[0].msg,
+      product: {
+        _id: id,
+        title: req.body.title,
+        imageUrl: req.body.imageUrl,
+        price: req.body.price,
+        description: req.body.description,
+      },
+    });
+  }
+
   const product = await Product.findById(id);
 
   if (product.userId.toString() !== req.user._id.toString()) {
-    return res.redirect('/');
+    return res.redirect("/");
   }
 
   product.title = req.body.title;
@@ -65,6 +100,7 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product,
+        errorMessage: "",
       });
     })
     .catch((err) => {
@@ -73,7 +109,7 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find({userId: req.user._id})
+  Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {
         prods: products,

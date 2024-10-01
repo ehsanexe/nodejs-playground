@@ -2,6 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator");
 
 const transport = nodemailer.createTransport({
   host: process.env.NODEMAILER_HOST,
@@ -13,11 +14,14 @@ const transport = nodemailer.createTransport({
 });
 
 exports.getLogin = (req, res, next) => {
-  const msg = req.flash("error");
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMessage: msg.length > 0 ? msg[0] : "",
+    errorMessage: "",
+    values: {
+      email: "",
+      password: "",
+    },
   });
 };
 
@@ -27,6 +31,11 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMessage: msg.length > 0 ? msg[0] : "",
+    values: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 };
 
@@ -35,10 +44,19 @@ exports.postSignup = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(req.body.password, 12);
     const email = req.body.email;
 
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      req.flash("error", "email already registered!");
-      return res.redirect("/signup");
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      res.render("auth/signup", {
+        path: "/signup",
+        pageTitle: "Signup",
+        errorMessage: result.array()[0].msg,
+        values: {
+          email,
+          password: req.body.password,
+          confirmPassword: req.body.confirmPassword,
+        },
+      });
+      return;
     }
 
     const user = new User({
@@ -61,23 +79,21 @@ exports.postSignup = async (req, res, next) => {
 
 exports.postLogin = async (req, res, next) => {
   try {
-    const email = req.body.email;
-    const password = req.body.password;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      req.flash("error", "invalid email!");
-      return res.redirect("/login");
-    }
-
-    const isCorrectPassword = await bcrypt.compare(password, user.password);
-    if (!isCorrectPassword) {
-      req.flash("error", "invalid password!");
-      return res.redirect("/login");
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      return res.render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: result.array()[0].msg,
+        values: {
+          email: req.body.email,
+          password: req.body.password,
+        },
+      });
     }
 
     req.session.isLoggedIn = true;
-    req.session.user = user;
+    req.session.user = req.user;
     req.session.save(() => {
       res.redirect("/");
     });

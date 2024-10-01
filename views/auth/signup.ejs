@@ -11,15 +11,15 @@
             <input type="hidden" name="csrfToken" value="<%=csrfToken%>" />
             <div class="form-control">
                 <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email">
+                <input type="email" name="email" id="email" value="<%= values.email %>" >
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password">
+                <input type="password" name="password" id="password" value="<%= values.password %>" >
             </div>
             <div class="form-control">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword">
+                <input type="password" name="confirmPassword" id="confirmPassword" value="<%= values.confirmPassword %>" >
             </div>
             <p style="color: red;"><%= errorMessage %></p>
             <button class="btn" type="submit">Signup</button>
