@@ -12,7 +12,7 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
@@ -27,7 +27,7 @@ exports.getProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
@@ -41,7 +41,7 @@ exports.getIndex = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
@@ -57,7 +57,7 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
@@ -69,7 +69,7 @@ exports.postCart = async (req, res, next) => {
     await req.user.addToCart(product);
     res.redirect("/cart");
   } catch (error) {
-    console.log(error);
+    next(new Error(err));
   }
 };
 
@@ -81,12 +81,12 @@ exports.postCartDeleteProduct = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
 exports.getOrders = (req, res, next) => {
-  Order.find({"user.userId": req.user._id})
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
@@ -95,7 +95,7 @@ exports.getOrders = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(new Error(err));
     });
 };
 
@@ -119,7 +119,7 @@ exports.postOrder = async (req, res, next) => {
     await req.user.clearCart();
     res.redirect("/orders");
   } catch (error) {
-    console.log(error);
+    next(new Error(err));
   }
 };
 

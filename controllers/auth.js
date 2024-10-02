@@ -73,7 +73,7 @@ exports.postSignup = async (req, res, next) => {
       html: "<p>We’re excited to have you on board. Your account has been successfully created.</p>", // plain text body
     });
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 };
 
@@ -98,7 +98,7 @@ exports.postLogin = async (req, res, next) => {
       res.redirect("/");
     });
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 };
 
@@ -149,7 +149,7 @@ exports.postReset = (req, res, next) => {
       res.redirect("/");
     });
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 };
 
@@ -170,7 +170,7 @@ exports.getNewPassword = async (req, res, next) => {
       passwordToken: token,
     });
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 };
 
@@ -190,6 +190,6 @@ exports.postNewPassword = async (req, res, next) => {
     await user.save();
     res.redirect("/login");
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 };

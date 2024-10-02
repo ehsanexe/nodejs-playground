@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require("dotenv").config(); // Load environment variables
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -12,7 +12,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const { doubleCsrf } = require("csrf-csrf");
 const cookieParser = require("cookie-parser");
-const flash = require('connect-flash');
+const flash = require("connect-flash");
 
 const uri = process.env.MONGO_DB;
 const app = express();
@@ -63,7 +63,7 @@ app.use(async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log(error);
+    next(new Error(error));
   }
 });
 
@@ -72,6 +72,7 @@ app.use(shopRoutes);
 app.use(loginRoutes);
 
 app.use(errorController.get404);
+app.use(errorController.get500);
 
 mongoose
   .connect(uri)
