@@ -13,6 +13,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const { doubleCsrf } = require("csrf-csrf");
 const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
+const multer = require("multer");
 
 const uri = process.env.MONGO_DB;
 const app = express();
@@ -20,15 +21,32 @@ const store = new MongoDBStore({
   uri,
   collection: "mySessions",
 });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images/");
+  },
+  filename: (req, file, cb) => {
+    const uniquePrefix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniquePrefix + "-" + file.originalname);
+  },
+});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.includes("image")) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+const upload = multer({ storage, fileFilter });
+
 const {
-  invalidCsrfTokenError, // This is just for convenience if you plan on making your own middleware.
-  generateToken, // Use this in your routes to provide a CSRF hash + token cookie and token.
-  validateRequest, // Also a convenience if you plan on making your own middleware.
   doubleCsrfProtection, // This is the default CSRF protection middleware.
 } = doubleCsrf({
   getSecret: () => "Secret",
   cookieName: "csrf",
-  getTokenFromRequest: (req) => req.body.csrfToken,
+  getTokenFromRequest: (req) => {
+    return req.body.csrfToken}
 });
 
 app.set("view engine", "ejs");
@@ -36,6 +54,7 @@ app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(
   session({
     secret: "my secret",
@@ -45,6 +64,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(upload.single("image"));
 app.use(doubleCsrfProtection);
 app.use(flash());
 

@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Product = require("../models/product");
+const fs = require("fs");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -12,7 +13,7 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
 
@@ -25,7 +26,7 @@ exports.postAddProduct = (req, res, next) => {
       errorMessage: result.array()[0].msg,
       product: {
         title,
-        imageUrl,
+        imageUrl: image.path,
         price,
         description,
       },
@@ -35,7 +36,7 @@ exports.postAddProduct = (req, res, next) => {
   const product = new Product({
     title,
     price,
-    imageUrl,
+    imageUrl: image.path,
     description,
     userId: req.user, //mongoose auto extracts id
   });
@@ -58,7 +59,7 @@ exports.postEditProduct = async (req, res, next) => {
       product: {
         _id: id,
         title: req.body.title,
-        imageUrl: req.body.imageUrl,
+        imageUrl: req.file.path,
         price: req.body.price,
         description: req.body.description,
       },
@@ -72,7 +73,7 @@ exports.postEditProduct = async (req, res, next) => {
   }
 
   product.title = req.body.title;
-  product.imageUrl = req.body.imageUrl;
+  product.imageUrl = req.file.path;
   product.price = req.body.price;
   product.description = req.body.description;
 
@@ -122,12 +123,15 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = (req, res) => {
-  Product.deleteOne({ _id: req.body.productId, userId: req.user._id })
-    .then(() => {
+exports.postDeleteProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.body.productId);
+    fs.unlink(product.imageUrl, async (err) => {
+      if (err) throw err;
+      await product.deleteOne();
       res.redirect("/admin/products");
-    })
-    .catch((err) => {
-      next(new Error(err));
     });
+  } catch (error) {
+    next(new Error(error));
+  }
 };

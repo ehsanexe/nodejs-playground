@@ -1,6 +1,8 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -120,6 +122,39 @@ exports.postOrder = async (req, res, next) => {
     res.redirect("/orders");
   } catch (error) {
     next(new Error(err));
+  }
+};
+
+exports.getInvoice = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      throw new Error("Authorization failed");
+    }
+
+    const doc = new PDFDocument();
+    doc.pipe(res);
+    doc.fontSize(25).text("Invoice");
+    doc.fontSize(25).text("-----------");
+
+    let totalPrice = 0;
+    order.products.forEach((item) => {
+      totalPrice += item.product.price * item.qty;
+      doc
+        .fontSize(12)
+        .text(
+          `- ${item.product.title} x ${item.qty} $ ${
+            item.product.price * item.qty
+          }`
+        );
+    });
+
+    doc.fontSize(12).text("------------------------");
+    doc.fontSize(12).text(`Total Price: $${totalPrice}`);
+
+    doc.end();
+  } catch (error) {
+    throw error;
   }
 };
 
