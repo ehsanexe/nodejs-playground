@@ -71,12 +71,16 @@ exports.postEditProduct = async (req, res, next) => {
   if (product.userId.toString() !== req.user._id.toString()) {
     return res.redirect("/");
   }
+  
+  fs.unlink(product.imageUrl, async (err) => {
+    if (err) throw err;
+  });
 
   product.title = req.body.title;
   product.imageUrl = req.file.path;
   product.price = req.body.price;
   product.description = req.body.description;
-
+ 
   product
     .save()
     .then(() => res.redirect("/admin/products"))
