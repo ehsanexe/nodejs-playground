@@ -76,7 +76,7 @@ form {
 .main-header__item a:hover,
 .main-header__item a:active,
 .main-header__item a.active {
-  color: #526FD6;
+  color: #526fd6;
 }
 
 .mobile-nav {
@@ -141,8 +141,8 @@ form {
 
 #side-menu-toggle:active,
 #side-menu-toggle:hover {
-  color: #526FD6;
-  border-color: #526FD6;
+  color: #526fd6;
+  border-color: #526fd6;
 }
 
 .backdrop {
@@ -234,4 +234,28 @@ form {
   #side-menu-toggle {
     display: none;
   }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 4rem;
+}
+
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.pagination a.active {
+  background-color: #526fd6;
+  color: white;
+  border-radius: 5px;
+}
+
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
+  border-radius: 5px;
 }

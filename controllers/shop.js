@@ -4,13 +4,23 @@ const User = require("../models/user");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 
-exports.getProducts = (req, res, next) => {
+exports.getProducts = async (req, res, next) => {
+  const pageNo = req.query.pageNo ? parseInt(req.query.pageNo) : 1;
+  const totleRecords = await Product.countDocuments();
+  const skip = process.env.PAGE_SIZE * pageNo - process.env.PAGE_SIZE;
+  const limit = process.env.PAGE_SIZE;
+  const totalPages = Math.ceil(totleRecords / process.env.PAGE_SIZE);
+
   Product.find()
+    .skip(skip)
+    .limit(limit)
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        pageNo,
+        totalPages,
       });
     })
     .catch((err) => {
@@ -33,13 +43,23 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-exports.getIndex = (req, res, next) => {
+exports.getIndex = async (req, res, next) => {
+  const pageNo = req.query.pageNo ? parseInt(req.query.pageNo) : 1;
+  const totleRecords = await Product.countDocuments();
+  const skip = process.env.PAGE_SIZE * pageNo - process.env.PAGE_SIZE;
+  const limit = process.env.PAGE_SIZE;
+  const totalPages = Math.ceil(totleRecords / process.env.PAGE_SIZE);
+
   Product.find()
+    .skip(skip)
+    .limit(limit)
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        pageNo,
+        totalPages,
       });
     })
     .catch((err) => {
