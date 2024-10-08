@@ -21,4 +21,6 @@ router.post("/add-product", productValidator, adminController.postAddProduct);
 
 router.post("/delete-product", adminController.postDeleteProduct);
 
+router.delete("/delete-product/:productId", adminController.deleteProduct);
+
 module.exports = router;

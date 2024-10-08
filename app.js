@@ -46,7 +46,7 @@ const {
   getSecret: () => "Secret",
   cookieName: "csrf",
   getTokenFromRequest: (req) => {
-    return req.body.csrfToken}
+    return req.body.csrfToken ?? req.headers.csrftoken}
 });
 
 app.set("view engine", "ejs");

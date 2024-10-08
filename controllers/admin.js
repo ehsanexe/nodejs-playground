@@ -139,3 +139,17 @@ exports.postDeleteProduct = async (req, res, next) => {
     next(new Error(error));
   }
 };
+
+exports.deleteProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    fs.unlink(product.imageUrl, async (err) => {
+      if (err) throw err;
+      await product.deleteOne();
+      res.status(200).json({message: "Item deleted successfully", status: 200})
+    });
+  } catch (error) {
+    res.status(500).json({message: error, status: 500})
+  }
+};
+
