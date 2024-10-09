@@ -1,8 +1,6 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
-const User = require("../models/user");
 const PDFDocument = require("pdfkit");
-const fs = require("fs");
 const stripe = require("stripe")(process.env.STRIPE);
 
 exports.getProducts = async (req, res, next) => {
@@ -92,7 +90,7 @@ exports.postCart = async (req, res, next) => {
     await req.user.addToCart(product);
     res.redirect("/cart");
   } catch (error) {
-    next(new Error(err));
+    next(new Error(error));
   }
 };
 
@@ -142,7 +140,7 @@ exports.postOrder = async (req, res, next) => {
     await req.user.clearCart();
     res.redirect("/orders");
   } catch (error) {
-    next(new Error(err));
+    next(new Error(error));
   }
 };
 
@@ -175,7 +173,7 @@ exports.getInvoice = async (req, res, next) => {
 
     doc.end();
   } catch (error) {
-    throw error;
+    next(new Error(error));
   }
 };
 
@@ -202,7 +200,7 @@ exports.postCheckout = async (req, res, next) => {
 
     res.redirect(303, session.url);
   } catch (error) {
-    throw error;
+    next(new Error(error));
   }
 };
 
