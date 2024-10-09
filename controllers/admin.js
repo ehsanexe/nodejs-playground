@@ -50,6 +50,7 @@ exports.postAddProduct = async (req, res, next) => {
       imageUrl: image.path,
       description,
       userId: req.user, //mongoose auto extracts id
+      stripeId: stripeProduct.id,
       stripePriceId: stripePrice.id,
     });
     await product.save();
@@ -60,44 +61,54 @@ exports.postAddProduct = async (req, res, next) => {
 };
 
 exports.postEditProduct = async (req, res, next) => {
-  const id = req.body.productId;
+  try {
+    const id = req.body.productId;
 
-  const result = validationResult(req);
-  if (!result.isEmpty()) {
-    return res.render("admin/edit-product", {
-      pageTitle: "Add Product",
-      path: "/admin/add-product",
-      editing: true,
-      errorMessage: result.array()[0].msg,
-      product: {
-        _id: id,
-        title: req.body.title,
-        imageUrl: req.file.path,
-        price: req.body.price,
-        description: req.body.description,
-      },
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      return res.render("admin/edit-product", {
+        pageTitle: "Add Product",
+        path: "/admin/add-product",
+        editing: true,
+        errorMessage: result.array()[0].msg,
+        product: {
+          _id: id,
+          title: req.body.title,
+          imageUrl: req.file.path,
+          price: req.body.price,
+          description: req.body.description,
+        },
+      });
+    }
+
+    const product = await Product.findById(id);
+
+    if (product.userId.toString() !== req.user._id.toString()) {
+      return res.redirect("/");
+    }
+
+    const stripePrice = await stripe.prices.create({
+      product: product.stripeId,
+      unit_amount: req.body.price * 100, // unit amount is in cents
+      currency: "usd",
     });
+
+    await stripe.products.update(product.stripeId, {
+      default_price: stripePrice.id,
+      name: req.body.title,
+    });
+
+    product.title = req.body.title;
+    product.imageUrl = req.file.path;
+    product.price = req.body.price;
+    product.description = req.body.description;
+    product.stripePriceId = stripePrice.id;
+
+    await product.save();
+    res.redirect("/admin/products");
+  } catch (error) {
+    next(new Error(error));
   }
-
-  const product = await Product.findById(id);
-
-  if (product.userId.toString() !== req.user._id.toString()) {
-    return res.redirect("/");
-  }
-
-  fs.unlink(product.imageUrl, async (err) => {
-    if (err) throw err;
-  });
-
-  product.title = req.body.title;
-  product.imageUrl = req.file.path;
-  product.price = req.body.price;
-  product.description = req.body.description;
-
-  product
-    .save()
-    .then(() => res.redirect("/admin/products"))
-    .catch((err) => next(new Error(err)));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -143,11 +154,16 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.body.productId);
-    fs.unlink(product.imageUrl, async (err) => {
-      if (err) throw err;
-      await product.deleteOne();
-      res.redirect("/admin/products");
+    const stripeProduct = await stripe.products.update(product.stripeId, {
+      active: false,
     });
+    if (!stripeProduct.active) {
+      fs.unlink(product.imageUrl, async (err) => {
+        if (err) throw err;
+        await product.deleteOne();
+        res.redirect("/admin/products");
+      });
+    }
   } catch (error) {
     next(new Error(error));
   }
@@ -156,13 +172,18 @@ exports.postDeleteProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.productId);
-    fs.unlink(product.imageUrl, async (err) => {
-      if (err) throw err;
-      await product.deleteOne();
-      res
-        .status(200)
-        .json({ message: "Item deleted successfully", status: 200 });
+    const stripeProduct = await stripe.products.update(product.stripeId, {
+      active: false,
     });
+    if (!stripeProduct.active) {
+      fs.unlink(product.imageUrl, async (err) => {
+        if (err) throw err;
+        await product.deleteOne();
+        res
+          .status(200)
+          .json({ message: "Item deleted successfully", status: 200 });
+      });
+    }
   } catch (error) {
     res.status(500).json({ message: error, status: 500 });
   }
