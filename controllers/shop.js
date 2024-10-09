@@ -3,6 +3,7 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+const stripe = require("stripe")(process.env.STRIPE);
 
 exports.getProducts = async (req, res, next) => {
   const pageNo = req.query.pageNo ? parseInt(req.query.pageNo) : 1;
@@ -173,6 +174,33 @@ exports.getInvoice = async (req, res, next) => {
     doc.fontSize(12).text(`Total Price: $${totalPrice}`);
 
     doc.end();
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.postCheckout = async (req, res, next) => {
+  try {
+    const user = await req.user.populate("cart.items.productId");
+    let products = user.cart.items.map((i) => ({
+      product: i.productId.toJSON(),
+      qty: i.qty,
+    }));
+    const host = req.get("host"); // Gets the host (domain + port)
+    const protocol = req.protocol; // Gets the protocol (http or https)
+    const domain = `${protocol}://${host}`;
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: products.map((item) => ({
+        price: item.product.stripePriceId,
+        quantity: item.qty,
+      })),
+      mode: "payment",
+      success_url: `${domain}/success`,
+      cancel_url: `${domain}/checkout`,
+    });
+
+    res.redirect(303, session.url);
   } catch (error) {
     throw error;
   }

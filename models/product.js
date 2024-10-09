@@ -11,6 +11,10 @@ const productScehma = new Schema({
     type: Number,
     required: true,
   },
+  stripePriceId: {
+    type: String,
+    required: true,
+  },
   imageUrl: {
     type: String,
     required: true,
