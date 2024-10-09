@@ -1,4 +1,4 @@
-# Shop Project
+# The Shop
 
 ![image](https://github.com/user-attachments/assets/8669c4ad-1d44-4a7e-8d40-fb2d6a96f9b5)
 
