@@ -87,6 +87,10 @@ exports.postEditProduct = async (req, res, next) => {
       return res.redirect("/");
     }
 
+    fs.unlink(product.imageUrl, (err) => {
+      if (err) throw err;
+    });
+
     const stripePrice = await stripe.prices.create({
       product: product.stripeId,
       unit_amount: req.body.price * 100, // unit amount is in cents
