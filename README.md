@@ -1,5 +1,7 @@
 # Shop Project
 
+![image](https://github.com/user-attachments/assets/8669c4ad-1d44-4a7e-8d40-fb2d6a96f9b5)
+
 ## Overview
 
 This project is a comprehensive Node.js and Express application designed to demonstrate core concepts of Node.js development. Utilizing an MVC (Model-View-Controller) architecture, this application integrates various technologies to create a robust online shop experience.
